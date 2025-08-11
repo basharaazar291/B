@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B - Futuristic Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" defer></script>
+    <script src="https://unpkg.com/@rive-app/canvas" defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .logo-b {
+            font-family: 'Orbitron', monospace;
+            font-size: 8rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00d4ff, #ff00ff, #00ff88);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 2s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            margin-top: 2rem;
+            color: #00d4ff;
+            opacity: 0.8;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00d4ff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 400;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, #00d4ff, #ff00ff);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .control-btn {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* 3D Canvas */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* Sections */
+        .section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 2rem;
+        }
+
+        .section-content {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+            z-index: 10;
+        }
+
+        /* Hero Section */
+        .hero-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #00d4ff, #ff00ff, #00ff88);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00d4ff, #ff00ff);
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #00d4ff;
+            border: 2px solid #00d4ff;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        /* About Section */
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .about-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .about-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(0, 212, 255, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #00d4ff;
+        }
+
+        /* Services Section */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 0, 255, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .service-card:hover::before {
+            left: 100%;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(255, 0, 255, 0.5);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #ff00ff;
+        }
+
+        /* Projects Section */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px) rotateY(5deg);
+            border-color: rgba(0, 255, 136, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.2);
+        }
+
+        .project-image {
+            height: 200px;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+
+        .project-info {
+            padding: 2rem;
+        }
+
+        .project-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #00ff88;
+        }
+
+        /* Contact Section */
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-top: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .contact-form {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 5px;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .form-group label {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .form-group input:focus + label,
+        .form-group textarea:focus + label,
+        .form-group input:not(:placeholder-shown) + label,
+        .form-group textarea:not(:placeholder-shown) + label {
+            top: -0.5rem;
+            left: 0.5rem;
+            font-size: 0.8rem;
+            color: #00d4ff;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50%;
+            color: #00d4ff;
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: rgba(0, 212, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Section Titles */
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #00d4ff, #ff00ff, #00ff88);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .nav {
+                display: none;
+            }
+
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Floating Elements */
+        .floating-element {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #00d4ff, #ff00ff);
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: fixed;
+            top: 50%;
+            right: 2rem;
+            transform: translateY(-50%);
+            z-index: 1000;
+        }
+
+        .scroll-dot {
+            width: 10px;
+            height: 10px;
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 50%;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .scroll-dot.active {
+            background: #00d4ff;
+            transform: scale(1.5);
+        }
+
+        /* Easter Egg */
+        .easter-egg {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .easter-egg:hover {
+            background: rgba(255, 0, 255, 0.2);
+            transform: scale(1.2);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 255, 0.1));
+            z-index: -1;
+            opacity: 0.5;
+            animation: pulse 8s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(10, 10, 10, 0.9);
+            padding: 3rem 2rem;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            margin-top: 5rem;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .footer-brand {
+            text-align: left;
+        }
+
+        .footer-logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00d4ff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .footer-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 400;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, #00d4ff, #ff00ff);
+            transition: width 0.3s ease;
+        }
+
+        .footer-links a:hover::after {
+            width: 100%;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .footer-social a {
+            color: #00d4ff;
+            font-size: 1.8rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-social a:hover {
+            color: #ff00ff;
+        }
+
+        .footer-bottom {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 2rem;
+        }
+
+        /* New styles for redesigned hero */
+        .redesigned-hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5rem;
+            padding: 4rem 2rem;
+        }
+
+        .hero-inner {
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .hero-left {
+            flex: 1;
+            text-align: left;
+        }
+
+        .hero-right {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .hero-glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .hero-glass-card:hover::before {
+            left: 100%;
+        }
+
+        .hero-card-caption {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            color: #ffffff;
+            margin-top: 1rem;
+            opacity: 0.9;
+        }
+
+        /* SVG illustration styles */
+        .svg-illustration {
+            width: 100%;
+            height: 100%;
+            max-width: 300px; /* Adjust as needed */
+            max-height: 300px; /* Adjust as needed */
+        }
+
+        /* Glass footer styles */
+        .glass-footer {
+            background: rgba(10, 10, 10, 0.9);
+            padding: 3rem 2rem;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            margin-top: 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .glass-footer:hover::before {
+            left: 100%;
+        }
+
+        .footer-groups {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* New styles for perfect footer */
+        .perfect-footer {
+            position: relative;
+            overflow: hidden;
+            padding: 3rem 2rem;
+            background: rgba(10, 10, 10, 0.9);
+            border-top: 1px solid rgba(0, 212, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .perfect-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .perfect-footer:hover::before {
+            left: 100%;
+        }
+
+        .footer-glass-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 255, 0.1));
+            z-index: -1;
+            opacity: 0.5;
+            animation: pulse 8s infinite;
+        }
+
+        .footer-main {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            gap: 3rem;
+        }
+
+        .footer-col {
+            flex: 1;
+            text-align: center;
+        }
+
+        .footer-brand-col {
+            text-align: left;
+        }
+
+        .footer-links-col {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-links-group a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 400;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links-group a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, #00d4ff, #ff00ff);
+            transition: width 0.3s ease;
+        }
+
+        .footer-links-group a:hover::after {
+            width: 100%;
+        }
+
+        .footer-social-col {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .footer-social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50%;
+            color: #00d4ff;
+            font-size: 1.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .footer-social-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .footer-bottom-line {
+            width: 100%;
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-bottom-line span {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="logo-b">B</div>
+            <div class="loading-text">Initializing 3D Systems...</div>
+            <!-- Profile data removed from loading screen -->
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">B</div>
+            <nav class="nav">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#services" class="nav-link">Services</a>
+                <a href="#projects" class="nav-link">Projects</a>
+                <a href="#profile" class="nav-link">Photo</a>
+            </nav>
+            <div class="header-controls">
+                <button id="sound-toggle" class="control-btn">🔊</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 3D Canvas -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator">
+        <div class="scroll-dot" data-section="home"></div>
+        <div class="scroll-dot" data-section="profile"></div>
+        <div class="scroll-dot" data-section="about"></div>
+        <div class="scroll-dot" data-section="services"></div>
+        <div class="scroll-dot" data-section="projects"></div>
+        <div class="scroll-dot" data-section="technologies"></div>
+        <div class="scroll-dot" data-section="ai-action"></div>
+        <div class="scroll-dot" data-section="clients"></div>
+        <!-- <div class="scroll-dot" data-section="partners"></div> -->
+    </div>
+
+    <!-- Octopus Mascot Floating Container -->
+    <div id="mascot-octopus" class="mascot-octopus">
+      <canvas id="rive-octopus" width="220" height="220" style="display:block;"></canvas>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="section hero-section redesigned-hero" data-section="home">
+            <div class="aurora-bg"></div>
+            <div class="hero-inner">
+                <div class="hero-left">
+                    <h1 class="hero-title" data-animate="motion-path">Bashar Portfolio<br><span class="hero-highlight">Solo Developer</span></h1>
+                    <div class="location-badge" aria-label="Based in Syria" data-animate="motion-path">🇸🇾 Based in Syria</div>
+                    <p class="hero-subtitle" data-animate="motion-path">I build fast Flutter apps, React.js web apps, and automation with n8n. I work with Google APIs, Firebase, GitHub, and Google Colab. This is my personal portfolio.</p>
+                <div class="hero-buttons">
+                        <button class="btn btn-primary" data-sound="click" data-animate="motion-path">Start a Project</button>
+                        <button class="btn btn-secondary" data-sound="click" data-animate="motion-path">See My Work</button>
+                </div>
+            </div>
+                <div class="hero-right">
+                    <div class="hero-glass-card">
+                        <!-- Stylized letter B SVG illustration -->
+                        <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="bGradient" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#00d4ff"/>
+                                    <stop offset="1" stop-color="#ff00ff"/>
+                                </linearGradient>
+                            </defs>
+                            <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-family="Orbitron, Poppins, Arial, sans-serif" font-size="120" font-weight="900" fill="url(#bGradient)" stroke="#fff" stroke-width="3" paint-order="stroke fill">B</text>
+                        </svg>
+                        <div class="hero-card-caption">AI & Mobile<br>Innovation</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-bg-effect"></div>
+        </section>
+        
+        <!-- Profile / Photo Section -->
+        <section id="profile" class="section" data-section="profile">
+            <div class="section-content">
+                <h2 class="section-title" data-animate="motion-path">About Me & Photo</h2>
+                <div class="profile-grid modern-profile">
+                    <div class="profile-card modern-profile-card" data-animate="motion-path">
+                        <div class="profile-photo-wrap modern-photo-wrap">
+                            <img id="profile-photo" class="profile-photo modern-photo" src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=400&h=400&q=80" alt="Bashar profile photo" loading="lazy" />
+                        </div>
+                        <div class="profile-info">
+                            <h3 class="profile-name">Bashar</h3>
+                            <p class="profile-location">🇸🇾 Syria</p>
+                            <p class="profile-text">Hey, I'm Bashar from Syria. I work with n8n automation, Flutter mobile apps, and full-stack web (HTML/CSS/JS).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="section" data-section="about">
+            <div class="section-content">
+                <h2 class="section-title" data-animate="motion-path">About Me</h2>
+                <div class="about-grid">
+                    <div class="about-card" data-animate="motion-path">
+                        <div class="card-icon">📱</div>
+                        <h3 class="card-title">Flutter Apps</h3>
+                        <p>I build fast, maintainable Flutter apps for iOS and Android with clean architecture and Firebase/GraphQL backends.</p>
+                    </div>
+                    <div class="about-card" data-animate="motion-path">
+                        <div class="card-icon">🔄</div>
+                        <h3 class="card-title">n8n Automation</h3>
+                        <p>I automate business workflows, connect APIs, and ship integrations using n8n, webhooks, and serverless functions.</p>
+                    </div>
+                    <div class="about-card" data-animate="motion-path">
+                        <div class="card-icon">🌐</div>
+                        <h3 class="card-title">Web & Cloud</h3>
+                        <p>I deliver modern websites (HTML/CSS/JS), dashboards, and cloud deployments on AWS/Azure/GCP.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="section" data-section="services">
+            <div class="section-content">
+                <h2 class="section-title" data-animate="motion-path">Our Services</h2>
+                <div class="services-grid">
+                    <div class="service-card" data-animate="motion-path">
+                        <div class="service-icon">📱</div>
+                        <h3 class="service-title">Flutter Mobile Apps</h3>
+                        <p>High-performance Flutter apps for iOS and Android with beautiful UI and solid architecture.</p>
+                    </div>
+                    <div class="service-card" data-animate="motion-path">
+                        <div class="service-icon">🧠</div>
+                        <h3 class="service-title">AI & Machine Learning</h3>
+                        <p>Custom AI models in Google Colab: Stable Diffusion pipelines, LLM chat, and computer vision integrations.</p>
+                    </div>
+                    <div class="service-card" data-animate="motion-path">
+                        <div class="service-icon">⚛️</div>
+                        <h3 class="service-title">React.js Websites</h3>
+                        <p>Modern React apps with Firebase, Google APIs, and GitHub CI/CD for reliable delivery.</p>
+                    </div>
+                    <div class="service-card" data-animate="motion-path">
+                        <div class="service-icon">🔄</div>
+                        <h3 class="service-title">Automation with n8n</h3>
+                        <p>Automate workflows, integrate APIs, and connect tools with n8n for speed and reliability.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="section" data-section="projects">
+            <div class="section-content">
+                <h2 class="section-title" data-animate="motion-path">Projects</h2>
+                <div class="projects-grid">
+                    <div class="project-card" data-animate="motion-path">
+                        <div class="project-image">🚗</div>
+                        <div class="project-info">
+                            <h3 class="project-title">BROKER</h3>
+                            <p>Flutter app for car and real estate sell/rent. AI chat, room-to-furniture AI, real-time chat, and Firebase push notifications.</p>
+                        </div>
+                    </div>
+                    <div class="project-card" data-animate="motion-path">
+                        <div class="project-image">🧠</div>
+                        <div class="project-info">
+                            <h3 class="project-title">Room Furnisher AI</h3>
+                            <p>AI model (Stable Diffusion) that transforms empty-room photos into furnished rooms; pipelines built in Google Colab.</p>
+                        </div>
+                    </div>
+                    <div class="project-card" data-animate="motion-path">
+                        <div class="project-image">🤖</div>
+                        <div class="project-info">
+                            <h3 class="project-title">Telegram Chatbot</h3>
+                            <p>LLM-based bot (Tencent Hunyuan) on Telegram for Q&A and helpers; integrated via n8n and Google APIs.</p>
+                        </div>
+                    </div>
+                    <div class="project-card" data-animate="motion-path">
+                        <div class="project-image">🩺</div>
+                        <div class="project-info">
+                            <h3 class="project-title">Sahtek Ma’na</h3>
+                            <p>Healthcare app using Flutter, Firebase, and Google Maps for clinics, booking, and navigation.</p>
+                        </div>
+                    </div>
+                    <div class="project-card" data-animate="motion-path">
+                        <div class="project-image">🛒</div>
+                        <div class="project-info">
+                            <h3 class="project-title">Cars Plaza</h3>
+                            <p>React.js e-commerce site for cars with search, filters, checkout, and Firebase/GitHub CI.</p>
+                        </div>
+                    </div>
+                    <div class="project-card" data-animate="motion-path">
+                        <div class="project-image">🔄</div>
+                        <div class="project-info">
+                            <h3 class="project-title">n8n Automations</h3>
+                            <p>Multiple workflows: chatbots, voice-to-visit doctor logger from Telegram to AI and export to Excel.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Removed team section: Solo portfolio -->
+        <section id="technologies" class="section" data-section="technologies">
+            <div class="section-content">
+                <h2 class="section-title" data-animate="motion-path">Technologies</h2>
+                <div class="services-grid">
+                    <div class="service-card" data-animate="motion-path">
+                        <div class="service-icon">🤖</div>
+                        <h3 class="service-title">AI/ML</h3>
+                        <p>TensorFlow, PyTorch, OpenAI, HuggingFace, custom LLMs.</p>
+                    </div>
+                    <div class="service-card" data-animate="motion-path">
+                        <div class="service-icon">📱</div>
+                        <h3 class="service-title">Mobile</h3>
+                        <p>Flutter, Firebase, Swift, Kotlin, GraphQL.</p>
+                    </div>
+                    <div class="service-card" data-animate="motion-path">
+                        <div class="service-icon">☁️</div>
+                        <h3 class="service-title">Cloud</h3>
+                        <p>AWS, Azure, Google Cloud, Docker, Kubernetes, CI/CD.</p>
+                    </div>
+                    <div class="service-card" data-animate="motion-path">
+                        <div class="service-icon">⚙️</div>
+                        <h3 class="service-title">Automation</h3>
+                        <p>n8n workflows, REST APIs, webhooks, and integrations for business automation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="ai-action" class="section" data-section="ai-action">
+            <div class="section-content">
+                <h2 class="section-title" data-animate="motion-path">AI in Action</h2>
+                <div class="projects-grid">
+                    <div class="project-card" data-animate="motion-path">
+                        <div class="project-image">🧠</div>
+                        <div class="project-info">
+                            <h3 class="project-title">SmartVision</h3>
+                            <p>Real-time computer vision for retail analytics and security.</p>
+                        </div>
+                    </div>
+                    <div class="project-card" data-animate="motion-path">
+                        <div class="project-image">💬</div>
+                        <div class="project-info">
+                            <h3 class="project-title">ChatGenie</h3>
+                            <p>Conversational AI for customer support and lead generation.</p>
+                        </div>
+                    </div>
+                    <div class="project-card" data-animate="motion-path">
+                        <div class="project-image">📊</div>
+                        <div class="project-info">
+                            <h3 class="project-title">PredictPro</h3>
+                            <p>Predictive analytics for smarter business decisions.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Replaced clients with a simple note -->
+        <section id="clients" class="section" data-section="clients">
+            <div class="section-content">
+                <h2 class="section-title" data-animate="motion-path">Note</h2>
+                <div class="about-grid">
+                    <div class="about-card" data-animate="motion-path">
+                        <div class="card-icon">👨‍💻</div>
+                        <h3 class="card-title">Solo Portfolio</h3>
+                        <p>I'm working alone. This portfolio shows my skills and personal projects.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Remove Partners Section -->
+        <!-- <section id="partners" class="section" data-section="partners">
+            <div class="section-content">
+                <h2 class="section-title" data-animate="motion-path">Partners</h2>
+                <div class="services-grid">
+                    <div class="service-card" data-animate="motion-path">
+                        <div class="service-icon">🔗</div>
+                        <h3 class="service-title">TechNova</h3>
+                        <p>Collaborating on next-gen AI and cloud solutions.</p>
+                    </div>
+                    <div class="service-card" data-animate="motion-path">
+                        <div class="service-icon">🤝</div>
+                        <h3 class="service-title">AppMakers</h3>
+                        <p>Joint ventures in mobile innovation and user experience.</p>
+                    </div>
+                    <div class="service-card" data-animate="motion-path">
+                        <div class="service-icon">🌐</div>
+                        <h3 class="service-title">CloudSync</h3>
+                        <p>Scaling businesses with secure, global cloud infrastructure.</p>
+                    </div>
+                </div>
+            </div>
+        </section> -->
+    </main>
+    <!-- Footer -->
+    <footer class="footer modern-footer">
+      <div class="footer-glass-bg"></div>
+      <div class="footer-inner">
+        <div class="footer-brand-area">
+          <span class="footer-logo">B Solutions</span>
+          <p class="footer-tagline">Innovating Mobile Apps & AI for a smarter tomorrow.</p>
+        </div>
+        <div class="footer-links-area">
+          <div class="footer-links-group">
+            <span class="footer-links-title">Main</span>
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#services">Services</a>
+            <a href="#projects">Projects</a>
+          </div>
+          <div class="footer-links-group">
+            <span class="footer-links-title">Company</span>
+             <!-- <a href="#team">Team</a> -->
+            <a href="#technologies">Technologies</a>
+            <a href="#ai-action">AI in Action</a>
+            <a href="#clients">Clients</a>
+            <!-- <a href="#partners">Partners</a> -->
+          </div>
+        </div>
+        <div class="footer-social-area">
+          <div class="footer-social-pill">
+            <a href="https://twitter.com/" class="footer-social-btn" title="Twitter" aria-label="Twitter" target="_blank">
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M22.46 5.924c-.793.352-1.645.59-2.54.698a4.48 4.48 0 0 0 1.963-2.475 8.94 8.94 0 0 1-2.828 1.082 4.48 4.48 0 0 0-7.635 4.086A12.72 12.72 0 0 1 3.112 4.89a4.48 4.48 0 0 0 1.387 5.976 4.47 4.47 0 0 1-2.03-.561v.057a4.48 4.48 0 0 0 3.593 4.393 4.5 4.5 0 0 1-2.025.077 4.48 4.48 0 0 0 4.184 3.11A8.98 8.98 0 0 1 2 19.54a12.67 12.67 0 0 0 6.88 2.017c8.26 0 12.78-6.84 12.78-12.77 0-.195-.004-.39-.013-.583A9.22 9.22 0 0 0 24 4.59a8.94 8.94 0 0 1-2.54.698z"/></svg>
+            </a>
+            <a href="https://linkedin.com/" class="footer-social-btn" title="LinkedIn" aria-label="LinkedIn" target="_blank">
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11 19h-3v-9h3v9zm-1.5-10.28c-.97 0-1.75-.79-1.75-1.75s.78-1.75 1.75-1.75 1.75.79 1.75 1.75-.78 1.75-1.75 1.75zm15.5 10.28h-3v-4.5c0-1.08-.02-2.47-1.5-2.47-1.5 0-1.73 1.17-1.73 2.39v4.58h-3v-9h2.89v1.23h.04c.4-.75 1.38-1.54 2.84-1.54 3.04 0 3.6 2 3.6 4.59v4.72z"/></svg>
+            </a>
+            <a href="https://github.com/" class="footer-social-btn" title="GitHub" aria-label="GitHub" target="_blank">
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.084-.729.084-.729 1.205.084 1.84 1.236 1.84 1.236 1.07 1.834 2.809 1.304 3.495.997.108-.775.418-1.305.762-1.605-2.665-.305-5.466-1.334-5.466-5.93 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23a11.52 11.52 0 0 1 3.003-.404c1.018.005 2.045.138 3.003.404 2.291-1.553 3.297-1.23 3.297-1.23.653 1.653.242 2.873.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.803 5.624-5.475 5.921.43.371.823 1.102.823 2.222v3.293c0 .322.218.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            </a>
+            <a href="https://facebook.com/" class="footer-social-btn" title="Facebook" aria-label="Facebook" target="_blank">
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35C.595 0 0 .592 0 1.326v21.348C0 23.408.595 24 1.325 24h11.495v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.797.143v3.24l-1.918.001c-1.504 0-1.797.715-1.797 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.73 0 1.325-.592 1.325-1.326V1.326C24 .592 23.405 0 22.675 0"/></svg>
+            </a>
+            <a href="https://instagram.com/" class="footer-social-btn" title="Instagram" aria-label="Instagram" target="_blank">
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.974.974 1.246 2.241 1.308 3.608.058 1.266.069 1.646.069 4.85s-.011 3.584-.069 4.85c-.062 1.366-.334 2.633-1.308 3.608-.974.974-2.241 1.246-3.608 1.308-1.266.058-1.646.069-4.85.069s-3.584-.011-4.85-.069c-1.366-.062-2.633-.334-3.608-1.308-.974-.974-1.246-2.241-1.308-3.608C2.175 15.647 2.163 15.267 2.163 12s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608.974-.974 2.241-1.246 3.608-1.308C8.416 2.175 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.332.013 7.052.072 5.771.131 4.659.425 3.678 1.406 2.697 2.387 2.403 3.499 2.344 4.78.013 8.332 0 8.741 0 12c0 3.259.013 3.668.072 4.948.059 1.281.353 2.393 1.334 3.374.981.981 2.093 1.275 3.374 1.334C8.332 23.987 8.741 24 12 24c3.259 0 3.668-.013 4.948-.072 1.281-.059 2.393-.353 3.374-1.334.981-.981 1.275-2.093 1.334-3.374.059-1.28.072-1.689.072-4.948 0-3.259-.013-3.668-.072-4.948-.059-1.281-.353-2.393-1.334-3.374-.981-.981-2.093-1.275-3.374-1.334C15.668.013 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a3.999 3.999 0 1 1 0-7.998 3.999 3.999 0 0 1 0 7.998zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+            </a>
+            <a href="https://youtube.com/" class="footer-social-btn" title="YouTube" aria-label="YouTube" target="_blank">
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a2.994 2.994 0 0 0-2.112-2.112C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.386.574A2.994 2.994 0 0 0 .502 6.186C0 8.072 0 12 0 12s0 3.928.502 5.814a2.994 2.994 0 0 0 2.112 2.112C4.5 20.5 12 20.5 12 20.5s7.5 0 9.386-.574a2.994 2.994 0 0 0 2.112-2.112C24 15.928 24 12 24 12s0-3.928-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+            <a href="https://tiktok.com/" class="footer-social-btn" title="TikTok" aria-label="TikTok" target="_blank">
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12.75 2v14.25a3.75 3.75 0 1 1-3.75-3.75h1.5a2.25 2.25 0 1 0 2.25 2.25V2h1.5a4.5 4.5 0 0 0 4.5 4.5V8A6 6 0 0 1 14.25 2h-1.5z"/></svg>
+            </a>
+            <a href="https://discord.com/" class="footer-social-btn" title="Discord" aria-label="Discord" target="_blank">
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.369A19.791 19.791 0 0 0 16.885 3.1a.074.074 0 0 0-.079.037c-.347.616-.734 1.419-1.006 2.05a18.524 18.524 0 0 0-5.6 0 12.51 12.51 0 0 0-1.018-2.05.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.369a.069.069 0 0 0-.032.027C.533 8.159-.32 11.885.099 15.565a.082.082 0 0 0 .031.056c2.1 1.542 4.13 2.48 6.13 3.104a.077.077 0 0 0 .084-.027c.472-.65.892-1.34 1.245-2.066a.076.076 0 0 0-.041-.104c-.652-.247-1.27-.549-1.872-.892a.077.077 0 0 1-.008-.127c.126-.094.252-.192.371-.291a.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.062 0a.075.075 0 0 1 .078.009c.12.099.245.197.372.291a.077.077 0 0 1-.006.127 12.298 12.298 0 0 1-1.873.892.076.076 0 0 0-.04.105c.36.726.78 1.416 1.246 2.066a.076.076 0 0 0 .084.027c2-.624 4.03-1.562 6.13-3.104a.077.077 0 0 0 .03-.055c.5-4.09-.838-7.786-3.548-11.169a.061.061 0 0 0-.03-.028zM8.02 15.331c-1.183 0-2.156-1.085-2.156-2.419 0-1.333.955-2.418 2.156-2.418 1.21 0 2.175 1.094 2.156 2.418 0 1.334-.955 2.419-2.156 2.419zm7.974 0c-1.183 0-2.156-1.085-2.156-2.419 0-1.333.955-2.418 2.156-2.418 1.21 0 2.175 1.094 2.156 2.418 0 1.334-.946 2.419-2.156 2.419z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom-line">
+        <span>&copy; 2024 B Solutions. All rights reserved.</span>
+      </div>
+    </footer>
+
+    <script src="script.js" defer></script>
+</body>
+</html>
